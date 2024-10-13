@@ -52,12 +52,12 @@ locals {
   # VPC
   vpc_cidr = var.vpc_cidr
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
-  # GitOps URLs
+  # GitOps Addons URL
   gitops_addons_url      = "${var.gitops_addons_org}/${var.gitops_addons_repo}"
   gitops_addons_basepath = var.gitops_addons_basepath
   gitops_addons_path     = var.gitops_addons_path
   gitops_addons_revision = var.gitops_addons_revision
-
+  # GitOps Workload URL
   gitops_workload_url      = "${var.gitops_workload_org}/${var.gitops_workload_repo}"
   gitops_workload_basepath = var.gitops_workload_basepath
   gitops_workload_path     = var.gitops_workload_path
@@ -143,9 +143,11 @@ locals {
 ################################################################################
 module "gitops_bridge_bootstrap" {
   source = "gitops-bridge-dev/gitops-bridge/helm"
-
+  # Metadata and list of addons for GitOps bridge
   cluster = {
+    # Metadata is passed to a secret as annotations
     metadata = local.addons_metadata
+    # Addons are created usign
     addons   = local.addons
   }
 }
@@ -156,15 +158,13 @@ module "gitops_bridge_bootstrap" {
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "~> 1.0"
-
+  # Cluster info
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint
   cluster_version   = module.eks.cluster_version
   oidc_provider_arn = module.eks.oidc_provider_arn
-
-  # Using GitOps Bridge
+  # GitOps bridge creates resources in this module's stead
   create_kubernetes_resources = false
-
   # EKS Blueprints Addons
   enable_cert_manager                 = local.aws_addons.enable_cert_manager
   enable_aws_efs_csi_driver           = local.aws_addons.enable_aws_efs_csi_driver
@@ -191,12 +191,26 @@ module "eks_blueprints_addons" {
 module "eks" {
   source                         = "terraform-aws-modules/eks/aws"
   version                        = "~> 19.13"
+  # General EKS configuration
   cluster_name                   = local.name
   cluster_version                = local.cluster_version
-  cluster_endpoint_public_access = true
+  cluster_endpoint_private_access         = var.cluster_endpoint_private_access
+  cluster_endpoint_public_access          = var.cluster_endpoint_public_access
+  # VPC configuration
   vpc_id                         = var.create_vpc ? module.vpc.vpc_id : var.vpc_id
   subnet_ids                     = var.create_vpc ? module.vpc.private_subnets : var.vpc_id
+  # Node Groups definition
   eks_managed_node_groups        = local.eks_managed_node_groups
+  # CloudWatch Configuration
+  create_cloudwatch_log_group             = var.create_cloudwatch_log_group
+  cluster_enabled_log_types               = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  # Security Groups definition
+  cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
+  node_security_group_additional_rules    = var.node_security_group_additional_rules
+  cluster_additional_security_group_ids   = var.cluster_additional_security_group_ids
+  #KMS
+  kms_key_users  = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+  kms_key_owners = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
   # EKS Addons
   cluster_addons = {
     coredns    = {}
@@ -244,16 +258,18 @@ module "vpc_cni_irsa" {
   }
   tags = var.tags
 }
-# Storage Class
+# Kubernetes GP3 Storage Class
 resource "kubernetes_storage_class" "gp3_ext4_encrypted" {
   metadata {
     name = "gp3-ext4-encrypted"
+    # Setting this as the default storage class for the cluster
     annotations = {
       "storageclass.kubernetes.io/is-default-class" = "true"
     }
   }
   storage_provisioner = "ebs.csi.aws.com"
   reclaim_policy      = "Delete"
+  # Encrypted ext4 storages
   parameters = {
     fsType    = "ext4"
     type      = "gp3"
