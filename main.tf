@@ -4,15 +4,18 @@ locals {
   region          = var.region
   tags            = var.tags
   cluster_version = var.kubernetes_version
+
   # EKS
   oidc_provider            = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
   iamproxy-service-account = "${var.cluster_name}-iamproxy-service-account"
+
   # EKS Access
   eks_access_iam_roles_map = { for role in var.eks_access_account_iam_roles : role.role_name => role }
   eks_access_entries = merge(
     { for role in data.aws_iam_roles.eks_access_iam_roles : role.name_regex => merge(local.eks_access_iam_roles_map[role.name_regex], { "arn" : tolist(role.arns)[0] }) },
     { for role in var.eks_access_cross_account_iam_roles : role.role_name => merge({ "role_name" = role.role_name, "access_scope" = role.access_scope, "policy_name" = role.policy_name, "arn" = role.prefix != null ? format("arn:aws:iam::%s:role/%s/%s", role.account, role.prefix, role.role_name) : format("arn:aws:iam::%s:role/%s", role.account, role.role_name) }) }
   )
+
   # EKS Node Groups
   default_critical_addon_nodegroup = {
     instance_types = var.default_critical_addon_node_group_instance_types
@@ -43,25 +46,30 @@ locals {
       },
     }
   }
+
   eks_managed_node_groups = merge(
     { for k, v in var.eks_managed_node_groups : "${var.cluster_name}-${k}" => v },
     var.create_default_critical_addon_node_group ? {
       "truemark-system" = local.default_critical_addon_nodegroup
     } : {}
   )
+
   # VPC
   vpc_cidr = var.vpc_cidr
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
+
   # GitOps Addons URL
   gitops_addons_url      = "${var.gitops_addons_org}/${var.gitops_addons_repo}"
   gitops_addons_basepath = var.gitops_addons_basepath
   gitops_addons_path     = var.gitops_addons_path
   gitops_addons_revision = var.gitops_addons_revision
+
   # GitOps Workload URL
   gitops_workload_url      = "${var.gitops_workload_org}/${var.gitops_workload_repo}"
   gitops_workload_basepath = var.gitops_workload_basepath
   gitops_workload_path     = var.gitops_workload_path
   gitops_workload_revision = var.gitops_workload_revision
+
   # GitOps Bridge AWS Addons
   aws_addons = {
     enable_cert_manager                          = try(var.addons.enable_cert_manager, false)
@@ -90,6 +98,7 @@ locals {
     enable_ack_sfn                               = try(var.addons.enable_ack_sfn, false)
     enable_ack_eventbridge                       = try(var.addons.enable_ack_eventbridge, false)
   }
+
   # GitOps Bridge OSS Addons
   oss_addons = {
     enable_argocd                          = try(var.addons.enable_argocd, true)
@@ -108,12 +117,14 @@ locals {
     enable_secrets_store_csi_driver        = try(var.addons.enable_secrets_store_csi_driver, false)
     enable_vpa                             = try(var.addons.enable_vpa, false)
   }
+
   addons = merge(
     local.aws_addons,
     local.oss_addons,
     { kubernetes_version = local.cluster_version },
     { aws_cluster_name = module.eks.cluster_name }
   )
+
   # GitOps Bridge Addons Metadata
   addons_metadata = merge(
     module.eks_blueprints_addons.gitops_metadata,
@@ -136,9 +147,10 @@ locals {
       workload_repo_revision = local.gitops_workload_revision
     }
   )
+
   argocd_apps = {
-  addons = file("${path.module}/bootstrap/addons.yaml")
-  workloads = file("${path.module}/bootstrap/workloads.yaml")
+    addons    = file("${path.module}/bootstrap/addons.yaml")
+    workloads = file("${path.module}/bootstrap/workloads.yaml")
   }
 }
 
@@ -147,6 +159,7 @@ locals {
 ################################################################################
 module "gitops_bridge_bootstrap" {
   source = "gitops-bridge-dev/gitops-bridge/helm"
+
   # Metadata and list of addons for GitOps bridge
   cluster = {
     # Cluster name
@@ -158,6 +171,7 @@ module "gitops_bridge_bootstrap" {
     # Environment
     environment = local.environment
   }
+
   # Argo CD apps to deploy
   apps = local.argocd_apps
 }
@@ -168,13 +182,16 @@ module "gitops_bridge_bootstrap" {
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "~> 1.0"
+
   # Cluster info
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint
   cluster_version   = module.eks.cluster_version
   oidc_provider_arn = module.eks.oidc_provider_arn
+
   # GitOps bridge creates resources in this module's stead
   create_kubernetes_resources = false
+
   # EKS Blueprints Addons
   enable_cert_manager                 = local.aws_addons.enable_cert_manager
   enable_aws_efs_csi_driver           = local.aws_addons.enable_aws_efs_csi_driver
@@ -201,26 +218,33 @@ module "eks_blueprints_addons" {
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 19.13"
+
   # General EKS configuration
   cluster_name                    = local.name
   cluster_version                 = local.cluster_version
   cluster_endpoint_private_access = var.cluster_endpoint_private_access
   cluster_endpoint_public_access  = var.cluster_endpoint_public_access
+
   # VPC configuration
   vpc_id     = var.create_vpc ? module.vpc.vpc_id : var.vpc_id
   subnet_ids = var.create_vpc ? module.vpc.private_subnets : var.vpc_id
+
   # Node Groups definition
   eks_managed_node_groups = local.eks_managed_node_groups
+
   # CloudWatch Configuration
   create_cloudwatch_log_group = var.create_cloudwatch_log_group
   cluster_enabled_log_types   = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
   # Security Groups definition
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
   node_security_group_additional_rules    = var.node_security_group_additional_rules
   cluster_additional_security_group_ids   = var.cluster_additional_security_group_ids
+
   # KMS Configuration
   kms_key_users  = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
   kms_key_owners = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+
   # EKS Addons
   cluster_addons = {
     coredns    = {}
@@ -240,6 +264,7 @@ module "eks" {
   }
   tags = local.tags
 }
+
 # IRSAs for EKS addons
 module "ebs_csi_driver_irsa" {
   source                = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
