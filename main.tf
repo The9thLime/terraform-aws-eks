@@ -136,6 +136,10 @@ locals {
       workload_repo_revision = local.gitops_workload_revision
     }
   )
+  argocd_apps = {
+  addons = file("${path.module}/bootstrap/addons.yaml")
+  workloads = file("${path.module}/bootstrap/workloads.yaml")
+  }
 }
 
 ################################################################################
@@ -145,11 +149,17 @@ module "gitops_bridge_bootstrap" {
   source = "gitops-bridge-dev/gitops-bridge/helm"
   # Metadata and list of addons for GitOps bridge
   cluster = {
+    # Cluster name
+    name = local.name
     # Metadata is passed to a secret as annotations
     metadata = local.addons_metadata
     # Addons are created usign
-    addons   = local.addons
+    addons = local.addons
+    # Environment
+    environment = local.environment
   }
+  # Argo CD apps to deploy
+  apps = local.argocd_apps
 }
 
 ################################################################################
@@ -189,26 +199,26 @@ module "eks_blueprints_addons" {
 # EKS Cluster
 ################################################################################
 module "eks" {
-  source                         = "terraform-aws-modules/eks/aws"
-  version                        = "~> 19.13"
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 19.13"
   # General EKS configuration
-  cluster_name                   = local.name
-  cluster_version                = local.cluster_version
-  cluster_endpoint_private_access         = var.cluster_endpoint_private_access
-  cluster_endpoint_public_access          = var.cluster_endpoint_public_access
+  cluster_name                    = local.name
+  cluster_version                 = local.cluster_version
+  cluster_endpoint_private_access = var.cluster_endpoint_private_access
+  cluster_endpoint_public_access  = var.cluster_endpoint_public_access
   # VPC configuration
-  vpc_id                         = var.create_vpc ? module.vpc.vpc_id : var.vpc_id
-  subnet_ids                     = var.create_vpc ? module.vpc.private_subnets : var.vpc_id
+  vpc_id     = var.create_vpc ? module.vpc.vpc_id : var.vpc_id
+  subnet_ids = var.create_vpc ? module.vpc.private_subnets : var.vpc_id
   # Node Groups definition
-  eks_managed_node_groups        = local.eks_managed_node_groups
+  eks_managed_node_groups = local.eks_managed_node_groups
   # CloudWatch Configuration
-  create_cloudwatch_log_group             = var.create_cloudwatch_log_group
-  cluster_enabled_log_types               = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  create_cloudwatch_log_group = var.create_cloudwatch_log_group
+  cluster_enabled_log_types   = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   # Security Groups definition
   cluster_security_group_additional_rules = var.cluster_security_group_additional_rules
   node_security_group_additional_rules    = var.node_security_group_additional_rules
   cluster_additional_security_group_ids   = var.cluster_additional_security_group_ids
-  #KMS
+  # KMS Configuration
   kms_key_users  = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
   kms_key_owners = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
   # EKS Addons
@@ -258,29 +268,7 @@ module "vpc_cni_irsa" {
   }
   tags = var.tags
 }
-# Kubernetes GP3 Storage Class
-resource "kubernetes_storage_class" "gp3_ext4_encrypted" {
-  metadata {
-    name = "gp3-ext4-encrypted"
-    # Setting this as the default storage class for the cluster
-    annotations = {
-      "storageclass.kubernetes.io/is-default-class" = "true"
-    }
-  }
-  storage_provisioner = "ebs.csi.aws.com"
-  reclaim_policy      = "Delete"
-  # Encrypted ext4 storages
-  parameters = {
-    fsType    = "ext4"
-    type      = "gp3"
-    encrypted = "true"
-  }
-  volume_binding_mode = "WaitForFirstConsumer"
-  depends_on = [
-    aws_eks_access_entry.access_entries,
-    aws_eks_access_policy_association.access_policy_associations
-  ]
-}
+
 # EKS Access Configuration
 resource "aws_eks_access_entry" "access_entries" {
   for_each      = local.eks_access_entries
