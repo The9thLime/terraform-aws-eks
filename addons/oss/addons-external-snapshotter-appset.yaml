@@ -7,20 +7,17 @@ spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
   generators:
-    - merge:
-        mergeKeys: [server]
-        generators:
-          - clusters:
-              values:
-                addonChart: external-snapshotter
-                addonChartNamespace: external-snapshotter
-                addonChartVersion: 1.0.0
-                addonChartRepository: https://this/
-              selector:
-                matchExpressions:
-                  - key: enable_external_snapshotter
-                    operator: In
-                    values: ['true']
+    - clusters:
+        values:
+          addonChart: external-snapshotter
+          addonChartNamespace: external-snapshotter
+          addonChartVersion: 1.0.0
+          addonChartRepository: https://this/
+        selector:
+          matchExpressions:
+            - key: enable_external_snapshotter
+              operator: In
+              values: ['true']
   template:
     metadata:
       name: addon-{{name}}-{{values.addonChart}}
