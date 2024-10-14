@@ -1,0 +1,25 @@
+apiVersion: karpenter.k8s.aws/v1beta1
+kind: EC2NodeClass
+metadata:
+  name: {{ .Values.nodeClass.name }}
+spec:
+  amiFamily: {{ .Values.nodeClass.amiFamily }}
+  blockDeviceMappings:
+    {{- range .Values.nodeClass.blockDeviceMappings }}
+    - deviceName: {{ .deviceName }}
+      ebs:
+        volumeSize: {{ .ebs.volumeSize }}
+        volumeType: {{ .ebs.volumeType }}
+    {{- end }}
+  role: {{ .Values.nodeClass.role }}
+  subnetSelectorTerms:
+    - tags:
+        {{- range $key, $value := .Values.nodeClass.subnetSelector }}
+        {{ $key }}: {{ $value }}
+        {{- end }}
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: {{ .Values.settings.clusterName }}
+  tags:
+    Name: {{ printf "%s-truemark-default" .Values.settings.clusterName }}
+    karpenter.sh/discovery: {{ .Values.settings.clusterName }}
