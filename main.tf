@@ -113,7 +113,7 @@ locals {
     {
       istio_public_subnet_ids = data.aws_subnets.istio_private_subnet_ids
       istio_private_subnets_ids = data.aws_subnets.istio_private_subnet_ids
-    }
+    },
     {
       addons_repo_url      = local.gitops_addons_url
       addons_repo_basepath = local.gitops_addons_basepath
