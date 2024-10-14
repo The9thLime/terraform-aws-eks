@@ -6,20 +6,54 @@ spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
   generators:
-    - merge:
-        mergeKeys: [server]
-        generators:
-          - clusters:
-              values:
-                addonChart: base
-                addonChartVersion: 1.18.3
-                addonChartNamespace: istio-system
-                addonChartRepository: https://istio-release.storage.googleapis.com/charts
-              selector:
-                matchExpressions:
-                  - key: enable_istio_base
-                    operator: In
-                    values: ['true']
+    - clusters:
+        values:
+          addonChart: base
+          addonChartName: istio-base
+          addonChartVersion: 1.18.3
+          addonChartNamespace: istio-system
+          addonChartRepository: https://istio-release.storage.googleapis.com/charts
+        selector:
+          matchExpressions:
+            - key: enable_istio
+              operator: In
+              values: ['true']
+    - clusters:
+        values:
+          addonChart: istiod
+          addonChartName: istio-discovery
+          addonChartVersion: 1.18.3
+          addonChartNamespace: istio-system
+          addonChartRepository: https://istio-release.storage.googleapis.com/charts
+        selector:
+          matchExpressions:
+            - key: enable_istio
+              operator: In
+              values: [ 'true' ]
+    - clusters:
+        values:
+          addonChart: gateway
+          addonChartName: istio-internal-gateway
+          addonChartVersion: 1.18.3
+          addonChartNamespace: istio-system
+          addonChartRepository: https://istio-release.storage.googleapis.com/charts
+        selector:
+          matchExpressions:
+            - key: enable_istio_internal_gateway
+              operator: In
+              values: [ 'true' ]
+    - clusters:
+        values:
+          addonChart: gateway
+          addonChartName: istio-external-gateway
+          addonChartVersion: 1.18.3
+          addonChartNamespace: istio-system
+          addonChartRepository: https://istio-release.storage.googleapis.com/charts
+        selector:
+          matchExpressions:
+            - key: enable_istio_external_gateway
+              operator: In
+              values: [ 'true' ]
   template:
     metadata:
       name: addon-{{name}}-{{values.addonChart}}
@@ -33,15 +67,13 @@ spec:
           repoURL: '{{values.addonChartRepository}}'
           targetRevision: '{{values.addonChartVersion}}'
           helm:
-            releaseName: '{{values.addonChart}}'
+            releaseName: '{{values.addonChartName}}'
             ignoreMissingValueFiles: true
             valueFiles:
-              - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
-            values: |
-              defaultRevision: "default"
+              - $values/{{metadata.annotations.addons_repo_basepath}}values/istio/{{values.addonChartName}}/values.yaml
       destination:
         namespace: '{{values.addonChartNamespace}}'
-        name: 'istio-{name}}'
+        name: '{{name}}'
       syncPolicy:
         automated: {}
         syncOptions:
