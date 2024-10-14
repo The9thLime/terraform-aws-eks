@@ -73,9 +73,6 @@ locals {
   # GitOps Bridge AWS Addons
   aws_addons = {
     enable_cert_manager                 = try(var.addons.enable_cert_manager, false)
-    enable_aws_cloudwatch_metrics       = try(var.addons.enable_aws_cloudwatch_metrics, false)
-    enable_cluster_autoscaler           = try(var.addons.enable_cluster_autoscaler, false)
-    enable_external_dns                 = try(var.addons.enable_external_dns, false)
     enable_external_secrets             = try(var.addons.enable_external_secrets, false)
     enable_aws_load_balancer_controller = try(var.addons.enable_aws_load_balancer_controller, false)
     enable_karpenter                    = try(var.addons.enable_karpenter, false)
@@ -85,12 +82,15 @@ locals {
   # GitOps Bridge OSS Addons
   oss_addons = {
     enable_argocd                 = try(var.addons.enable_argocd, true)
-    enable_istio_base             = try(var.addons.enable_istio_base, false)
-    enable_istio_discovery        = try(var.addons.enable_istio_discovery, false)
+    enable_castai                 = try(var.addons.enable_castai, false)
+    enable_external_snapshotter   = try(var.addons.enable_external_snapshotter, false)
+    enable_istio                  = try(var.addons.enable_istio, false)
     enable_istio_internal_gateway = try(var.addons.enable_istio_internal_gateway, false)
     enable_istio_external_gateway = try(var.addons.enable_istio_internal_gateway, false)
     enable_kube_prometheus_stack  = try(var.addons.enable_kube_prometheus_stack, false)
     enable_metrics_server         = try(var.addons.enable_metrics_server, false)
+    enable_snapscheduler          = try(var.addons.enable.snapscheduler, false)
+    enable_traefik                = try(var.addons.enable_traefik, false)
     enable_vpa                    = try(var.addons.enable_vpa, false)
   }
 
@@ -111,7 +111,7 @@ locals {
       aws_vpc_id       = var.create_vpc ? module.vpc.vpc_id : var.vpc_id
     },
     {
-      istio_public_subnet_ids = data.aws_subnets.istio_private_subnet_ids
+      istio_public_subnet_ids   = data.aws_subnets.istio_private_subnet_ids
       istio_private_subnets_ids = data.aws_subnets.istio_private_subnet_ids
     },
     {
@@ -174,9 +174,6 @@ module "eks_blueprints_addons" {
 
   # EKS Blueprints Addons
   enable_cert_manager                 = local.aws_addons.enable_cert_manager
-  enable_aws_cloudwatch_metrics       = local.aws_addons.enable_aws_cloudwatch_metrics
-  enable_cluster_autoscaler           = local.aws_addons.enable_cluster_autoscaler
-  enable_external_dns                 = local.aws_addons.enable_external_dns
   enable_external_secrets             = local.aws_addons.enable_external_secrets
   enable_aws_load_balancer_controller = local.aws_addons.enable_aws_load_balancer_controller
   enable_karpenter                    = local.aws_addons.enable_karpenter
