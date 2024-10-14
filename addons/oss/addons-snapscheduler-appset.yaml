@@ -18,9 +18,13 @@ spec:
                 addonChartRepository: https://backube.github.io/helm-charts/
               selector:
                 matchExpressions:
+                  - key: enable_karpenter
+                    operator: In
+                    values: ['true']
                   - key: enable_snapscheduler
                     operator: In
                     values: ['true']
+
   template:
     metadata:
       name: addon-{{name}}-{{values.addonChart}}
