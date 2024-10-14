@@ -7,11 +7,11 @@ nodePool:
     ttlUntilExpired: 2592000     # TTL for provisioned resources until they expire
   arm:
     name: truemark-arm64
+    expireAfter: "720h"
     disruption:
       budgets:
         - nodes: 10%
-      consolidationPolicy: WhenUnderutilized
-      expireAfter: "720h"
+      consolidationPolicy: WhenEmptyOrUnderutilized
       consolidateAfter: 30s
     requirements:
       - key: "karpenter.k8s.aws/instance-category"
@@ -35,12 +35,12 @@ nodePool:
         value: "truemark-arm64"
         effect: NoSchedule
   amd:
+    expireAfter: "720h"
     name: truemark-amd64
     disruption:
       budgets:
         - nodes: 10%
-      consolidationPolicy: WhenUnderutilized
-      expireAfter: "720h"
+      consolidationPolicy: WhenEmptyOrUnderutilized
       consolidateAfter: 30s
     requirements:
       - key: "karpenter.k8s.aws/instance-category"

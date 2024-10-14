@@ -5,6 +5,7 @@ metadata:
 spec:
   template:
     spec:
+      expireAfter: {{ .Values.nodePool.arm.expireAfter}}
       nodeClassRef:
         name: {{ .Values.nodeClass.name}}
       taints:
@@ -23,6 +24,7 @@ metadata:
 spec:
   template:
     spec:
+      expireAfter: {{ .Values.nodePool.amd.expireAfter}}
       nodeClassRef:
         name: {{ .Values.nodeClass.name}}
       taints:

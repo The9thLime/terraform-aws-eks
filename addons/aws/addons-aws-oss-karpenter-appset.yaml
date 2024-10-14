@@ -12,7 +12,7 @@ spec:
           addonChart: karpenter
           addonChartReleaseName: karpenter
           addonChartNamespace: karpenter
-          addonChartVersion: v0.34.1
+          addonChartVersion: v1.0
           # using oci repository already configure in argocd
           # argocd repo add public.ecr.aws --type helm --name aws-public-ecr --enable-oci
           addonChartRepository: public.ecr.aws
