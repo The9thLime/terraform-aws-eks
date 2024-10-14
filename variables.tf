@@ -173,6 +173,7 @@ variable "cluster_additional_security_group_ids" {
   type        = list(string)
   default     = []
 }
+
 ##########################################################################
 # EKS Addons Configuration
 ##########################################################################
@@ -224,6 +225,7 @@ variable "gitops_addons_path" {
   type        = string
   default     = "bootstrap/control-plane/addons"
 }
+
 ##########################################################################
 # Workloads Git
 ##########################################################################
