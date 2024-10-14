@@ -21,34 +21,6 @@ spec:
             - key: enable_karpenter
               operator: In
               values: ['true']
-    - clusters:
-        values:
-          addonChart: karpenter-crd
-          addonChartReleaseName: karpenter-crd
-          addonChartNamespace: karpenter
-          addonChartVersion: v0.34.1
-          # using oci repository already configure in argocd
-          # argocd repo add public.ecr.aws --type helm --name aws-public-ecr --enable-oci
-          addonChartRepository: public.ecr.aws
-        selector:
-          matchExpressions:
-            - key: enable_karpenter
-              operator: In
-              values: ['true']
-    - clusters:
-        values:
-          addonChart: karpenter-resources
-          addonChartReleaseName: karpenter-crd
-          addonChartNamespace: karpenter
-          addonChartVersion: v0.34.1
-          # using oci repository already configure in argocd
-          # argocd repo add public.ecr.aws --type helm --name aws-public-ecr --enable-oci
-          addonChartRepository: public.ecr.aws
-        selector:
-          matchExpressions:
-            - key: enable_karpenter
-              operator: In
-              values: [ 'true' ]
   template:
     metadata:
       name: addon-{{name}}-{{values.addonChart}}
@@ -68,7 +40,7 @@ spec:
             valueFiles:
               - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
         # For custom nodePools and nodeClasses
-        - repoURL: '{{metadata.annotations.addons_repo_url}}/{{metadata.annotations.addons_repo_basepath}}charts/{{values.addonChart}}'
+        - repoURL: '{{metadata.annotations.addons_repo_url}}/{{metadata.annotations.addons_repo_basepath}}/{{metadata.annotations.addons_repo_path}}/charts/{{values.addonChart}}'
           targetRevision: HEAD
           chart: karpenter-resources
           helm:
