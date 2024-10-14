@@ -7,20 +7,17 @@ spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
   generators:
-    - merge:
-        mergeKeys: [server]
-        generators:
-          - clusters:
-              values:
-                addonChart: argo-cd
-                addonChartVersion: 6.6.0
-                addonChartRepositoryNamespace: argocd
-                addonChartRepository: https://argoproj.github.io/argo-helm
-              selector:
-                matchExpressions:
-                  - key: enable_argocd
-                    operator: In
-                    values: ['true']
+    - clusters:
+        values:
+          addonChart: argo-cd
+          addonChartVersion: 6.6.0
+          addonChartRepositoryNamespace: argocd
+          addonChartRepository: https://argoproj.github.io/argo-helm
+        selector:
+          matchExpressions:
+            - key: enable_argocd
+              operator: In
+              values: ['true']
   template:
     metadata:
       name: addon-{{name}}-{{values.addonChart}}
