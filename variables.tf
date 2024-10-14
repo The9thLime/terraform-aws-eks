@@ -203,12 +203,12 @@ variable "vpc_cidr" {
 variable "gitops_addons_org" {
   description = "Git repository org/user contains for addons"
   type        = string
-  default     = "https://github.com/gitops-bridge-dev"
+  default     = "https://github.com/truemark"
 }
 variable "gitops_addons_repo" {
   description = "Git repository contains for addons"
   type        = string
-  default     = "gitops-bridge-argocd-control-plane-template"
+  default     = "terraform-aws-eks"
 }
 variable "gitops_addons_revision" {
   description = "Git repository revision/branch/ref for addons"
@@ -223,7 +223,7 @@ variable "gitops_addons_basepath" {
 variable "gitops_addons_path" {
   description = "Git repository path for addons"
   type        = string
-  default     = "bootstrap/control-plane/addons"
+  default     = "addons"
 }
 
 ##########################################################################
@@ -232,12 +232,12 @@ variable "gitops_addons_path" {
 variable "gitops_workload_org" {
   description = "Git repository org/user contains for workload"
   type        = string
-  default     = "https://github.com/gitops-bridge-dev"
+  default     = "https://github.com/truemark"
 }
 variable "gitops_workload_repo" {
   description = "Git repository contains for workload"
   type        = string
-  default     = "gitops-bridge"
+  default     = "terraform-aws-eks"
 }
 variable "gitops_workload_revision" {
   description = "Git repository revision/branch/ref for workload"
@@ -247,10 +247,10 @@ variable "gitops_workload_revision" {
 variable "gitops_workload_basepath" {
   description = "Git repository base path for workload"
   type        = string
-  default     = "argocd/iac/terraform/examples/eks/"
+  default     = ""
 }
 variable "gitops_workload_path" {
   description = "Git repository path for workload"
   type        = string
-  default     = "getting-started/k8s"
+  default     = ""
 }
