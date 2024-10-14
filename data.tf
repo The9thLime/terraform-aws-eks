@@ -1,3 +1,23 @@
+data "aws_subnets" "istio_private_subnet_ids" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+  tags = {
+    network = "private"
+  }
+}
+
+data "aws_subnets" "istio_public_subnet_ids" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+  tags = {
+    network = "public"
+  }
+}
+
 data "aws_iam_roles" "eks_access_iam_roles" {
   for_each   = toset(var.eks_access_account_iam_roles.*.role_name)
   name_regex = each.key
