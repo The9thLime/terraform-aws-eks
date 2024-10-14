@@ -1,0 +1,33 @@
+recommender:
+  nodeSelector:
+    CriticalAddonsOnly: "true"  # from critical_addons_node_selector
+  tolerations:
+    - key: "CriticalAddonsOnly"
+      operator: "Equal"
+      effect: "NoSchedule"
+      value: "true"  # from critical_addons_node_tolerations
+updater:
+  enabled: false
+  nodeSelector:
+    CriticalAddonsOnly: "true"  # from critical_addons_node_selector
+  tolerations:
+    - key: "CriticalAddonsOnly"
+      operator: "Equal"
+      effect: "NoSchedule"
+      value: "true"  # from critical_addons_node_tolerations
+admissionController:
+  nodeSelector:
+    CriticalAddonsOnly: "true"  # from critical_addons_node_selector
+  tolerations:
+    - key: "CriticalAddonsOnly"
+      operator: "Equal"
+      effect: "NoSchedule"
+      value: "true"  # from critical_addons_node_tolerations
+  certGen:
+    nodeSelector:
+      karpenter.sh/nodepool: "truemark-amd64"
+    tolerations:
+      - key: "karpenter.sh/nodepool"
+        operator: "Equal"
+        effect: "NoSchedule"
+        value: "truemark-amd64"
