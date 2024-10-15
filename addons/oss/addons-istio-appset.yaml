@@ -54,6 +54,18 @@ spec:
             - key: enable_istio_external_gateway
               operator: In
               values: [ 'true' ]
+    - clusters:
+        values:
+          addonChart: istio-resources
+          addonChartName: istio-resources
+          addonChartVersion: 1.0.0
+          addonChartNamespace: istio-system
+          addonChartRepository: https://github.com/The9thLime/terraform-aws-eks/tree/feat/gitops-bridge/charts/istio/
+        selector:
+          matchExpressions:
+            - key: enable_istio
+              operator: In
+              values: [ 'true' ]
   template:
     metadata:
       name: addon-{{name}}-{{values.addonChart}}
