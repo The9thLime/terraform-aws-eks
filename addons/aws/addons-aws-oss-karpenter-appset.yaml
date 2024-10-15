@@ -15,7 +15,7 @@ spec:
           addonChartVersion: 1.0.0
           # using oci repository already configure in argocd
           # argocd repo add public.ecr.aws --type helm --name aws-public-ecr --enable-oci
-          addonChartRepository: public.ecr.aws
+          addonChartRepository: public.ecr.aws/karpenter
         selector:
           matchExpressions:
             - key: enable_karpenter
