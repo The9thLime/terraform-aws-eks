@@ -7,21 +7,18 @@ spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
   generators:
-    - merge:
-        mergeKeys: [server]
-        generators:
-          - clusters:
-              values:
-                addonChart: cert-manager
-                addonChartVersion: v1.14.3
-                addonChartRepository: https://charts.jetstack.io
-              selector:
-                matchExpressions:
-                  - key: enable_cert_manager
-                    operator: In
-                    values: ['true']
-                  - key: aws_cluster_name
-                    operator: Exists
+    - clusters:
+        values:
+          addonChart: cert-manager
+          addonChartVersion: v1.14.3
+          addonChartRepository: https://charts.jetstack.io
+        selector:
+          matchExpressions:
+            - key: enable_cert_manager
+              operator: In
+              values: ['true']
+            - key: aws_cluster_name
+              operator: Exists
   template:
     metadata:
       name: addon-{{name}}-{{values.addonChart}}
@@ -40,13 +37,7 @@ spec:
             valueFiles:
               - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
             values: |
-              {{- if ge (split .Values.certManagerChartVersion "." | index 1 | int) 15 }}
-              crds:
-                enabled: true
-                keep: true
-              {{- else }}
               installCRDS: true
-              {{- end }}
               serviceAccount:
                 name: {{metadata.annotations.cert_manager_service_account}}
                 annotations:
