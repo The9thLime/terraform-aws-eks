@@ -42,7 +42,6 @@ spec:
         # For custom nodePools and nodeClasses
         - repoURL: '{{metadata.annotations.addons_repo_url}}/charts/{{values.addonChart}}'
           targetRevision: main
-          chart: karpenter-resources
           helm:
             valueFiles:
               - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
