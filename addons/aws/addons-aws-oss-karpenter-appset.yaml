@@ -40,7 +40,7 @@ spec:
             valueFiles:
               - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
         # For custom nodePools and nodeClasses
-        - repoURL: '{{metadata.annotations.addons_repo_url}}/{{metadata.annotations.addons_repo_basepath}}/{{metadata.annotations.addons_repo_path}}/charts/{{values.addonChart}}'
+        - repoURL: '{{metadata.annotations.addons_repo_url}}/{{metadata.annotations.addons_repo_basepath}}/charts/{{values.addonChart}}'
           targetRevision: HEAD
           chart: karpenter-resources
           helm:
