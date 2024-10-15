@@ -10,7 +10,7 @@ spec:
     - clusters:
         values:
           addonChart: argo-cd
-          addonChartVersion: 6.6.0
+          addonChartVersion: 7.6.8
           addonChartRepositoryNamespace: argocd
           addonChartRepository: https://argoproj.github.io/argo-helm
         selector:
