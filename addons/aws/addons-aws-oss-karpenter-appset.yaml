@@ -40,12 +40,12 @@ spec:
             valueFiles:
               - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
         # For custom nodePools and nodeClasses
-        - repoURL: '{{metadata.annotations.addons_repo_url}}/{{metadata.annotations.addons_repo_basepath}}/charts/{{values.addonChart}}'
+        - repoURL: '{{metadata.annotations.addons_repo_url}}/charts/{{values.addonChart}}'
           targetRevision: HEAD
           chart: karpenter-resources
           helm:
-            - valueFiles:
-                - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
+            valueFiles:
+              - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
         # For Karpenter itself
         - chart: '{{values.addonChartRepositoryNamespace}}/{{values.addonChart}}'
           repoURL: '{{values.addonChartRepository}}'
@@ -58,7 +58,7 @@ spec:
             values: |
               nodeClass:
                 role: {{metadata.annotations.karpeneter_node_iam_role_arn}}
-                name: {{metadata.annotations.aws_cluster_name}}-truemark-defaul
+                name: {{metadata.annotations.aws_cluster_name}}-truemark-default
               settings:
                 clusterName: {{metadata.annotations.aws_cluster_name}}
                 interruptionQueue: {{metadata.annotations.karpenter_sqs_queue_name}}
