@@ -1,0 +1,37 @@
+apiVersion: karpenter.sh/v1beta1
+kind: NodePool
+metadata:
+  name: {{ .Values.nodePool.arm.name}}
+spec:
+  template:
+    spec:
+      expireAfter: {{ .Values.nodePool.arm.expireAfter}}
+      nodeClassRef:
+        name: {{ .Values.nodeClass.name}}
+      taints:
+        {{- toYaml .Values.nodePool.arm.taints | nindent 8}}
+      requirements:
+        {{- toYaml .Values.nodePool.arm.requirements | nindent 8 }}
+  disruption:
+    {{- toYaml .Values.nodePool.amd.disruption | nindent 6}}
+  weight: {{ .Values.nodePool.arm.weight }}
+
+---
+apiVersion: karpenter.sh/v1beta1
+kind: NodePool
+metadata:
+  name: {{ .Values.nodePool.amd.name}}
+spec:
+  template:
+    spec:
+      expireAfter: {{ .Values.nodePool.amd.expireAfter}}
+      nodeClassRef:
+        name: {{ .Values.nodeClass.name}}
+      taints:
+        {{- toYaml .Values.nodePool.arm.taints | nindent 8}}
+      requirements:
+        {{- toYaml .Values.nodePool.amd.requirements | nindent 8 }}
+  disruption:
+    {{- toYaml .Values.nodePool.amd.disruption | nindent 6}}
+  weight: {{ .Values.nodePool.amd.weight }}
+

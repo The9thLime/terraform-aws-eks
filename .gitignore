@@ -1,0 +1,6 @@
+.DS_Store
+.editorconfig
+.idea/
+.terraform/
+*.lock*
+*.tfstate
