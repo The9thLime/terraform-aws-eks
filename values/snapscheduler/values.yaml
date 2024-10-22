@@ -1,0 +1,6 @@
+manageCRDs: true
+tolerations:
+  - key: "karpenter.sh/nodepool"
+    value: "truemark-amd64"
+    operator: "Equal"
+    effect: "NoSchedule"

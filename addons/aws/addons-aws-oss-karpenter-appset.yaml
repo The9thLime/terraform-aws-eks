@@ -1,0 +1,76 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: addons-aws-karpenter
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - clusters:
+        values:
+          addonChart: karpenter
+          addonChartReleaseName: karpenter
+          addonChartNamespace: karpenter
+          addonChartVersion: 1.0.0
+          # using oci repository already configure in argocd
+          # argocd repo add public.ecr.aws --type helm --name aws-public-ecr --enable-oci
+          addonChartRepository: public.ecr.aws/karpenter
+        selector:
+          matchExpressions:
+            - key: enable_karpenter
+              operator: In
+              values: ['true']
+  template:
+    metadata:
+      name: addon-{{name}}-{{values.addonChart}}
+    spec:
+      project: default
+      # Multiples sources to install resources, CRDs, and the main Helm chart
+      sources:
+        # For values
+        - repoURL: '{{metadata.annotations.addons_repo_url}}'
+          targetRevision: '{{metadata.annotations.addons_repo_revision}}'
+          ref: values
+        # For Karpenter CRDs
+        - repoURL: '{{values.addonChartRepository}}'
+          targetRevision: '{{values.addonChartVersion}}'
+          chart: karpenter-crd
+          helm:
+            valueFiles:
+              - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
+        # For custom nodePools and nodeClasses
+        - repoURL: '{{metadata.annotations.addons_repo_url}}/charts/{{values.addonChart}}'
+          targetRevision: main
+          chart: karpenter-resources
+          helm:
+            valueFiles:
+              - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
+        # For Karpenter itself
+        - chart: '{{values.addonChartRepositoryNamespace}}/{{values.addonChart}}'
+          repoURL: '{{values.addonChartRepository}}'
+          targetRevision: '{{values.addonChartVersion}}'
+          helm:
+            releaseName: '{{values.addonChartReleaseName}}'
+            ignoreMissingValueFiles: true
+            valueFiles:
+              - $values/{{metadata.annotations.addons_repo_basepath}}values/{{values.addonChart}}/values.yaml
+            values: |
+              nodeClass:
+                role: {{metadata.annotations.karpeneter_node_iam_role_arn}}
+                name: {{metadata.annotations.aws_cluster_name}}-truemark-default
+              settings:
+                clusterName: {{metadata.annotations.aws_cluster_name}}
+                interruptionQueue: {{metadata.annotations.karpenter_sqs_queue_name}}
+              serviceAccount:
+                name: {{metadata.annotations.karpenter_service_account}}
+                annotations:
+                  eks.amazonaws.com/role-arn: {{metadata.annotations.karpenter_iam_role_arn}}
+      destination:
+        namespace: '{{values.addonChartNamespace}}'
+        name: '{{name}}'
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true  # Big CRDs.

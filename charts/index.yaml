@@ -1,0 +1,43 @@
+apiVersion: v1
+entries:
+  aws-ebs-csi-classes:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-10-14T17:23:29.2362+05:30"
+    digest: 9cbc1270e285478e66a6bb08873f8a1fc654ed3e07412f0191a332a650338e01
+    name: aws-ebs-csi-classes
+    type: application
+    urls:
+    - aws-ebs-csi/aws-ebs-csi-classes-0.1.0.tgz
+    version: 0.1.0
+  external-snapshotter:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-10-14T17:23:29.236652+05:30"
+    digest: 600e834b940a1e3e9903066ce2d81bf32836b0f1a49865d43e6d9370b2cd2050
+    name: external-snapshotter
+    type: application
+    urls:
+    - external-snapshotter/external-snapshotter-1.0.0.tgz
+    version: 1.0.0
+  istio-resources:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-10-14T17:23:29.236915+05:30"
+    digest: 0a1430e766277a8518c91cbb5e281923053e9047fa4e16f85d6dbf0dc35896e6
+    name: istio-resources
+    type: application
+    urls:
+    - istio/istio-resources-1.0.0.tgz
+    version: 1.0.0
+  karpenter-resources:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-10-14T17:23:29.238788+05:30"
+    digest: 83dedec48baf0227142035314c2d73bb3389a8a493007a53101884852da3292f
+    name: karpenter-resources
+    type: application
+    urls:
+    - karpenter/karpenter-resources-1.0.0.tgz
+    version: 1.0.0
+generated: "2024-10-14T17:23:29.235542+05:30"

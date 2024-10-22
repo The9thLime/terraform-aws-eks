@@ -1,0 +1,10 @@
+snapshotterImage: registry.k8s.io/sig-storage/snapshot-controller:v8.0.1
+
+nodeSelector:
+  CriticalAddonsOnly: "true"
+
+nodeTolerations:
+  - key: "CriticalAddonsOnly"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
